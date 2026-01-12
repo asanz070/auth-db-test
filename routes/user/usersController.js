@@ -32,4 +32,33 @@ const createUser = async (userData) => {
     }
 }
 
-module.exports = { createUser }
+const loginUser = async (userData) => {
+    try {
+        // verify username exists in the first place and the credentials match in the DB
+        // ".findOne" will return the object instead of the array
+        const foundUser = await User.findOne({ username: userData.username });
+
+        // if we don't find the user, throw an error
+        if (!foundUser) {
+            throw 'User Not Found!'
+        }
+
+        // compare incoming password to the one in the DB 
+        // incoming: userData.password
+        // db: user.password
+        const isCorrectPassword = await bcrypt.compare(userData.password, foundUser.password)
+
+        // if the passwords DON'T match, throw error
+        if (!isCorrectPassword) {
+            throw 'Incorrect password'
+        }
+
+        // if the password is correct we can return it
+        return foundUser
+
+    } catch (error) {
+        throw error
+    }
+}
+
+module.exports = { createUser, loginUser }
